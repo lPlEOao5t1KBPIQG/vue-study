@@ -64,3 +64,7 @@ class Vue3Binding {
     }
     return arr;
   }
+  
+  // 使用示例
+  const arr = [5, 3, 8, 4, 2];
+  console.log(bubbleSort(arr)); // [2, 3, 4, 5, 8]
