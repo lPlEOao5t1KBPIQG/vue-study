@@ -55,6 +55,7 @@ class Vue3Binding {
   // 冒泡排序
   function bubbleSort(arr) {
     const len = arr.length;
+    console.log('merge confict test');
     for (let i = 0; i < len; i++) {
       for (let j = 0; j < len - 1 - i; j++) {
         if (arr[j] > arr[j + 1]) {
