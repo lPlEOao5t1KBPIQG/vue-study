@@ -70,3 +70,21 @@ class Vue3Binding {
   const arr = [5, 3, 8, 4, 2];
   console.log(bubbleSort(arr)); // [2, 3, 4, 5, 8]
   //test
+
+  // 前序遍历算法
+function preorderTraversal(root) {
+    if (!root) return [];
+  
+    const result = [];
+    const stack = [root];
+  
+    while (stack.length) {
+      const node = stack.pop();
+      result.push(node.val);
+  
+      if (node.right) stack.push(node.right);
+      if (node.left) stack.push(node.left);
+    }
+  
+    return result;
+  }
