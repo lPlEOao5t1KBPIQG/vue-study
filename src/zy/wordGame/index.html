@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+</body>
+
+</html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Pronunciation Shape Challenge</title>
+    <!-- 通过 link 标签引入外部 CSS -->
+    <link rel="stylesheet" href="./index.css">
+</head>
+
+<body>
+
+    <!-- 视频 -->
+    <video id="bgVideo" autoplay muted loop playsinline
+        style="position:fixed; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:0;">
+        <source src="https://ai-demo-lab-test.ledupeiyou.com/monopoly-game/assets/01.mp4" type="video/mp4">
+    </video>
+    <!-- 游戏UI覆盖层 -->
+    <div id="overlay">
+        <div id="info-wrapper">请选择单词<span id="current-word" style="color:red;margin-left: 10px;font-size: 30px;"></span> 通过游戏</div>
+        <div id="gallery">
+
+        </div>
+        <div class="game-tip">
+            <div id="success"></div>
+            <div class="score-wrapper">
+                <!-- <span>score:</span> -->
+                <!-- <span id="score-inner">0</span> -->
+            </div>
+        </div></span>
+
+    </div>
+    </div>
+
+    <!-- 引入Three.js库 -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script> -->
+    <script src="https://ai-demo-lab-test.ledupeiyou.com/monopoly-game/three.js"></script>
+    <script src="https://ai-demo-lab-test.ledupeiyou.com/monopoly-game/OrbitControls.js"></script>
+    <!-- 引入OrbitControls控制器(虽然代码中没有使用) -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script> -->
+    <!-- 主游戏逻辑 -->
+    <script type="module" src="./index.js"></script>
+    <script type="module">
+        import { data } from './utils.js'
+
+
+        const container = document.getElementById('gallery');
+        container.innerHTML = '';
+
+        for (let i = 0; i < data.length; i++) {
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.dataset.seed = data[i].seed;
+
+            item.innerHTML = `
+        <span class="img-item">${data[i].seed}</span>
+      `;
+
+            container.appendChild(item);
+        }
+    </script>
+</body>
+
+</html>
