@@ -6,8 +6,8 @@ tags:
 ---
 ## 参考 **[代码随想录](https://programmercarl.com/)**
 
-## 排序、
 
+## 排序
 
 ### 1.冒泡排序
 
