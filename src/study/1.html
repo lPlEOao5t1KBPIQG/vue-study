@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>二维网格颜色分配器</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+        color: #fff;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+      }
+
+      h1 {
+        font-size: 2.8rem;
+        margin-bottom: 15px;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        background: linear-gradient(to right, #ff8a00, #da1b60);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .subtitle {
+        font-size: 1.2rem;
+        max-width: 800px;
+        margin: 0 auto;
+        line-height: 1.6;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        margin-bottom: 30px;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .control-group {
+        display: flex;
+        flex-direction: column;
+        min-width: 200px;
+      }
+
+      label {
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #ffd700;
+      }
+
+      input,
+      select,
+      button {
+        padding: 12px 15px;
+        border: none;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.25);
+        box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.4);
+      }
+
+      button {
+        background: linear-gradient(45deg, #ff8a00, #da1b60);
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 15px;
+        box-shadow: 0 4px 15px rgba(218, 27, 96, 0.4);
+      }
+
+      button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(218, 27, 96, 0.6);
+      }
+
+      button:active {
+        transform: translateY(1px);
+      }
+
+      .color-palette {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+        justify-content: center;
+      }
+
+      .color-item {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        cursor: pointer;
+        border: 2px solid white;
+        transition: transform 0.2s;
+      }
+
+      .color-item:hover {
+        transform: scale(1.1);
+      }
+
+      .color-item.selected {
+        transform: scale(1.15);
+        box-shadow:
+          0 0 0 3px gold,
+          0 0 15px rgba(255, 215, 0, 0.8);
+      }
+
+      .grid-container {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+      }
+
+      .grid-row {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 15px;
+      }
+
+      .grid-item {
+        width: 70px;
+        height: 70px;
+        border-radius: 12px;
+        margin: 0 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.5rem;
+        color: rgba(0, 0, 0, 0.7);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .grid-item:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      }
+
+      .grid-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+        z-index: 1;
+      }
+
+      .item-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+      }
+
+      .info-panel {
+        margin-top: 30px;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 15px;
+        font-size: 1.1rem;
+        line-height: 1.6;
+      }
+
+      .info-panel h2 {
+        color: #ffd700;
+        margin-bottom: 15px;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .stat-card {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        border-radius: 10px;
+      }
+
+      .highlight {
+        color: #ffd700;
+        font-weight: bold;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 40px;
+        padding: 20px;
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      @media (max-width: 768px) {
+        .grid-item {
+          width: 50px;
+          height: 50px;
+          font-size: 1.2rem;
+        }
+
+        h1 {
+          font-size: 2.2rem;
+        }
+
+        .controls {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>二维网格颜色分配器</h1>
+        <p class="subtitle">
+          为二维网格中的每个项目智能分配颜色，确保相邻项目颜色不同，同时保持颜色分布均匀和视觉美观。
+        </p>
+      </header>
+
+      <div class="controls">
+        <div class="control-group">
+          <label for="rows">行数:</label>
+          <input type="number" id="rows" min="1" max="10" value="4" />
+        </div>
+
+        <div class="control-group">
+          <label for="maxColumns">每行最大元素数:</label>
+          <input type="number" id="maxColumns" min="1" max="10" value="6" />
+        </div>
+
+        <div class="control-group">
+          <label for="itemCount">总项目数:</label>
+          <input type="number" id="itemCount" min="1" max="60" value="20" />
+        </div>
+
+        <div class="control-group">
+          <label>颜色选择:</label>
+          <div class="color-palette" id="colorPalette">
+            <!-- 颜色选项将由JS生成 -->
+          </div>
+        </div>
+
+        <div class="control-group">
+          <button id="generateBtn">生成网格</button>
+          <button id="randomizeBtn">随机颜色</button>
+        </div>
+      </div>
+
+      <div class="grid-container" id="gridContainer">
+        <!-- 网格将由JS生成 -->
+      </div>
+
+      <div class="info-panel">
+        <h2>算法说明</h2>
+        <p>此解决方案使用智能算法为二维网格中的每个项目分配颜色：</p>
+        <ul>
+          <li>确保相邻元素（包括对角线）颜色不同</li>
+          <li>使用7种颜色均匀分布在整个网格中</li>
+          <li>处理不规则行（每行最多6个元素）</li>
+          <li>优先选择使用次数最少的颜色</li>
+          <li>当多个颜色可用时随机选择</li>
+        </ul>
+
+        <div class="stats" id="stats">
+          <!-- 统计信息将由JS生成 -->
+        </div>
+      </div>
+
+      <footer>
+        <p>© 2023 二维网格颜色分配器 | 保证相邻项目颜色不同的智能算法</p>
+      </footer>
+    </div>
+
+    <script>
+      // 默认颜色配置
+      const DEFAULT_COLORS = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#1A535C', '#FF9F1C', '#6A4C93', '#118AB2']
+
+      // 初始化颜色选择器
+      function initColorPalette() {
+        const paletteContainer = document.getElementById('colorPalette')
+        paletteContainer.innerHTML = ''
+
+        DEFAULT_COLORS.forEach((color, index) => {
+          const colorItem = document.createElement('div')
+          colorItem.className = 'color-item'
+          colorItem.style.backgroundColor = color
+          colorItem.dataset.color = color
+          colorItem.dataset.index = index
+          colorItem.addEventListener('click', () => toggleColorSelection(index))
+
+          paletteContainer.appendChild(colorItem)
+        })
+      }
+
+      // 切换颜色选择状态
+      function toggleColorSelection(index) {
+        const colorItem = document.querySelector(`.color-item[data-index="${index}"]`)
+        colorItem.classList.toggle('selected')
+      }
+
+      // 获取选中的颜色
+      function getSelectedColors() {
+        const selected = document.querySelectorAll('.color-item.selected')
+        return Array.from(selected).map((item) => item.dataset.color)
+      }
+
+      // 生成网格
+      function generateGrid() {
+        const rows = parseInt(document.getElementById('rows').value)
+        const maxColumns = parseInt(document.getElementById('maxColumns').value)
+        const itemCount = parseInt(document.getElementById('itemCount').value)
+        const selectedColors = getSelectedColors()
+
+        // 如果未选择颜色，使用所有默认颜色
+        const colors = selectedColors.length > 0 ? selectedColors : DEFAULT_COLORS
+
+        // 生成二维网格数据
+        const gridData = []
+        let itemsRemaining = itemCount
+
+        for (let i = 0; i < rows; i++) {
+          const colsInRow = Math.min(maxColumns, itemsRemaining)
+          gridData.push(Array(colsInRow).fill(null))
+          itemsRemaining -= colsInRow
+          if (itemsRemaining <= 0) break
+        }
+
+        console.log('生成的网格数据:', gridData)
+
+        // 为网格分配颜色
+        const coloredGrid = assignColorsToGrid(gridData, colors)
+        console.log('分配颜色后的网格:', coloredGrid)
+        // 渲染网格
+        renderGrid(coloredGrid)
+
+        // 显示统计信息
+        showStatistics(coloredGrid, colors)
+      }
+
+      // 智能分配颜色到网格
+      function assignColorsToGrid(grid, colors) {
+        const colorCount = {}
+        colors.forEach((color) => {
+          colorCount[color] = 0
+        })
+
+        const resultGrid = []
+
+        for (let row = 0; row < grid.length; row++) {
+          const currentRow = []
+          const rowLength = grid[row].length
+
+          for (let col = 0; col < rowLength; col++) {
+            // 获取禁止使用的颜色（相邻元素）
+            const forbidden = new Set()
+
+            // 检查左侧元素
+            if (col > 0) forbidden.add(currentRow[col - 1])
+
+            // 检查上方元素
+            if (row > 0) {
+              // 正上方
+              if (col < resultGrid[row - 1].length) {
+                forbidden.add(resultGrid[row - 1][col])
+              }
+
+              // 左上方
+              if (col > 0 && col - 1 < resultGrid[row - 1].length) {
+                forbidden.add(resultGrid[row - 1][col - 1])
+              }
+
+              // 右上方
+              if (col + 1 < resultGrid[row - 1].length) {
+                forbidden.add(resultGrid[row - 1][col + 1])
+              }
+            }
+
+            // 获取可用颜色
+            let available = colors.filter((color) => !forbidden.has(color))
+
+            // 如果可用颜色为空，回退到所有颜色
+            if (available.length === 0) available = [...colors]
+
+            // 选择使用次数最少的颜色
+            let minCount = Infinity
+            let candidates = []
+
+            for (const color of available) {
+              if (colorCount[color] < minCount) {
+                minCount = colorCount[color]
+                candidates = [color]
+              } else if (colorCount[color] === minCount) {
+                candidates.push(color)
+              }
+            }
+
+            // 随机选择候选颜色
+            const selected = candidates[Math.floor(Math.random() * candidates.length)]
+            currentRow.push(selected)
+            colorCount[selected]++
+          }
+
+          resultGrid.push(currentRow)
+        }
+
+        return resultGrid
+      }
+
+      // 渲染网格到页面
+      function renderGrid(grid) {
+        const container = document.getElementById('gridContainer')
+        container.innerHTML = ''
+
+        grid.forEach((row, rowIndex) => {
+          const rowDiv = document.createElement('div')
+          rowDiv.className = 'grid-row'
+
+          row.forEach((color, colIndex) => {
+            const item = document.createElement('div')
+            item.className = 'grid-item'
+            item.style.backgroundColor = color
+
+            const content = document.createElement('div')
+            content.className = 'item-content'
+            content.textContent = `${rowIndex * 6 + colIndex + 1}`
+
+            item.appendChild(content)
+            rowDiv.appendChild(item)
+          })
+
+          container.appendChild(rowDiv)
+        })
+      }
+
+      // 显示统计信息
+      function showStatistics(grid, colors) {
+        const statsContainer = document.getElementById('stats')
+        const colorUsage = {}
+        let totalItems = 0
+
+        // 初始化颜色使用计数
+        colors.forEach((color) => {
+          colorUsage[color] = 0
+        })
+
+        // 统计颜色使用情况
+        grid.forEach((row) => {
+          row.forEach((color) => {
+            colorUsage[color]++
+            totalItems++
+          })
+        })
+
+        // 生成统计HTML
+        let statsHTML = `
+                <div class="stat-card">
+                    <h3>网格统计</h3>
+                    <p>总行数: <span class="highlight">${grid.length}</span></p>
+                    <p>总项目数: <span class="highlight">${totalItems}</span></p>
+                    <p>使用颜色数: <span class="highlight">${colors.length}</span></p>
+                </div>
+            `
+
+        // 添加每个颜色的统计
+        colors.forEach((color) => {
+          const count = colorUsage[color]
+          const percentage = totalItems > 0 ? ((count / totalItems) * 100).toFixed(1) : 0
+
+          statsHTML += `
+                    <div class="stat-card">
+                        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <div style="width: 20px; height: 20px; background: ${color}; border-radius: 4px; margin-right: 10px;"></div>
+                            <h3>${color}</h3>
+                        </div>
+                        <p>使用次数: <span class="highlight">${count}</span></p>
+                        <p>占比: <span class="highlight">${percentage}%</span></p>
+                    </div>
+                `
+        })
+
+        statsContainer.innerHTML = statsHTML
+      }
+
+      // 随机选择颜色
+      function randomizeColors() {
+        const colorItems = document.querySelectorAll('.color-item')
+        colorItems.forEach((item) => {
+          // 随机决定是否选择这个颜色（70%概率选择）
+          const selected = Math.random() > 0.3
+          item.classList.toggle('selected', selected)
+        })
+      }
+
+      // 初始化页面
+      document.addEventListener('DOMContentLoaded', () => {
+        initColorPalette()
+
+        // 默认选择所有颜色
+        document.querySelectorAll('.color-item').forEach((item) => {
+          item.classList.add('selected')
+        })
+
+        // 添加事件监听器
+        document.getElementById('generateBtn').addEventListener('click', generateGrid)
+        document.getElementById('randomizeBtn').addEventListener('click', randomizeColors)
+
+        // 初始生成网格
+        generateGrid()
+      })
+    </script>
+    <script>
+// 智能分配颜色到网格
+// function assignColorsToGrid(grid: StudentData[][], colors = DEFAULT_IMAGES): StudentData[][] {
+//   const colorCount: Record<string, number> = {}
+//   colors.forEach((color) => {
+//     colorCount[color] = 0
+//   })
+
+//   for (let row = 0; row < grid.length; row++) {
+//     const rowLength = grid[row].length
+
+//     for (let col = 0; col < rowLength; col++) {
+//       const forbidden = new Set<string>()
+
+//       // 左边
+//       if (col > 0) {
+//         const leftColor = grid[row][col - 1].bg
+//         if (leftColor) forbidden.add(leftColor)
+//       }
+
+//       // 上边
+//       if (row > 0) {
+//         const upperRow = grid[row - 1]
+
+//         // 正上
+//         if (col < upperRow.length) {
+//           const upColor = upperRow[col].bg
+//           if (upColor) forbidden.add(upColor)
+//         }
+
+//         // 左上
+//         if (col > 0 && col - 1 < upperRow.length) {
+//           const leftUpColor = upperRow[col - 1].bg
+//           if (leftUpColor) forbidden.add(leftUpColor)
+//         }
+
+//         // 右上
+//         if (col + 1 < upperRow.length) {
+//           const rightUpColor = upperRow[col + 1].bg
+//           if (rightUpColor) forbidden.add(rightUpColor)
+//         }
+//       }
+
+//       // 可用颜色
+//       let available = colors.filter((color) => !forbidden.has(color))
+
+//       if (available.length === 0) available = [...colors]
+
+//       // 使用最少的颜色
+//       let minCount = Infinity
+//       let candidates: string[] = []
+
+//       for (const color of available) {
+//         if (colorCount[color] < minCount) {
+//           minCount = colorCount[color]
+//           candidates = [color]
+//         } else if (colorCount[color] === minCount) {
+//           candidates.push(color)
+//         }
+//       }
+
+//       const selected = candidates[Math.floor(Math.random() * candidates.length)]
+//       colorCount[selected]++
+
+//       // ✅ 直接赋值给原始 grid 中的元素
+//       grid[row][col].bg = selected
+//     }
+//   }
+
+//   return grid
+// }
+
+
+
+    </script>
+  </body>
+</html>
